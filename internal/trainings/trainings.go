@@ -1,12 +1,14 @@
 package trainings
 
 import (
+	"errors"
 	"fmt"
-	"github.com/Yandex-Practicum/tracker/internal/personaldata"
-	"github.com/Yandex-Practicum/tracker/internal/spentenergy"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Yandex-Practicum/tracker/internal/personaldata"
+	"github.com/Yandex-Practicum/tracker/internal/spentenergy"
 )
 
 type Training struct {
@@ -19,16 +21,14 @@ type Training struct {
 func (t *Training) Parse(datastring string) (err error) {
 	trainingData := strings.Split(datastring, ",")
 	if len(trainingData) != 3 {
-		err = fmt.Errorf("invalid input data")
-		return
+		return errors.New("invalid input data")
 	}
 	steps, err := strconv.Atoi(trainingData[0])
 	if err != nil {
 		return
 	}
 	if steps <= 0 {
-		err = fmt.Errorf("steps value is invalid")
-		return
+		return errors.New("steps value is invalid")
 	}
 
 	duration, err := time.ParseDuration(trainingData[2])
@@ -36,7 +36,7 @@ func (t *Training) Parse(datastring string) (err error) {
 		return
 	}
 	if duration <= 0 {
-		err = fmt.Errorf("duration value is invalid")
+		return errors.New("duration value is invalid")
 	}
 
 	t.Steps = steps
@@ -57,16 +57,13 @@ func (t Training) ActionInfo() (string, error) {
 	switch t.TrainingType {
 	case "Ходьба":
 		spentCalories, err = spentenergy.WalkingSpentCalories(t.Steps, t.Weight, t.Height, t.Duration)
-		if err != nil {
-			return "", err
-		}
 	case "Бег":
 		spentCalories, err = spentenergy.RunningSpentCalories(t.Steps, t.Weight, t.Height, t.Duration)
-		if err != nil {
-			return "", err
-		}
 	default:
 		return "", fmt.Errorf("invalid training type")
+	}
+	if err != nil {
+		return "", err
 	}
 
 	ans := fmt.Sprintf("Тип тренировки: %s\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n", t.TrainingType, t.Duration.Hours(), distance, meanSpeed, spentCalories)

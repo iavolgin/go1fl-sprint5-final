@@ -1,12 +1,14 @@
 package daysteps
 
 import (
+	"errors"
 	"fmt"
-	"github.com/Yandex-Practicum/tracker/internal/personaldata"
-	"github.com/Yandex-Practicum/tracker/internal/spentenergy"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Yandex-Practicum/tracker/internal/personaldata"
+	"github.com/Yandex-Practicum/tracker/internal/spentenergy"
 )
 
 type DaySteps struct {
@@ -18,16 +20,14 @@ type DaySteps struct {
 func (ds *DaySteps) Parse(datastring string) (err error) {
 	stepsData := strings.Split(datastring, ",")
 	if len(stepsData) != 2 {
-		err = fmt.Errorf("invalid input data")
-		return
+		return errors.New("invalid input data")
 	}
 	steps, err := strconv.Atoi(stepsData[0])
 	if err != nil {
 		return
 	}
 	if steps <= 0 {
-		err = fmt.Errorf("steps value is invalid")
-		return
+		return errors.New("steps value is invalid")
 	}
 
 	duration, err := time.ParseDuration(stepsData[1])
@@ -35,7 +35,7 @@ func (ds *DaySteps) Parse(datastring string) (err error) {
 		return
 	}
 	if duration <= 0 {
-		err = fmt.Errorf("duration value is invalid")
+		return errors.New("duration value is invalid")
 	}
 
 	ds.Steps = steps
